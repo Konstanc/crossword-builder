@@ -125,5 +125,5 @@ export function solve(words: string[], initialState: State) {
     const solveState = cleanCopyState(initialState);
     solvePath = connectStateToSteps(solveState, solvePath);
     const solved = doSolve(words, solvePath);
-    return solveState;
+    return solved ? solveState : false;
 }

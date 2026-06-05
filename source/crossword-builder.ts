@@ -1,22 +1,24 @@
-import { wpToFieldXY } from './utils';
 import { readField, readWords } from './input';
 import { solve } from './solver';
-import { Cell, Field, MatchIndex, SolveStep, State, WordPlace } from './types';
 import { printStateValues, printValues } from './output';
+import { getArgValue } from './utils';
 
-// TODO: Read from params
-let dictFileName = 'words.txt';
-let fieldFileName = 'field.txt';
-
+let dictFileName = getArgValue('-w') || 'words.txt';
+let fieldFileName = getArgValue('-f') || 'field.txt';
 
 function main() {
-    const initialState = readField(fieldFileName);
+    try {
+        const initialState = readField(fieldFileName);
 
-    const words = readWords(dictFileName);
+        const words = readWords(dictFileName);
 
-    const solveState = solve(words, initialState);
-    printStateValues(solveState)
-    
+        const solveState = solve(words, initialState);
+        if (solveState) printStateValues(solveState);
+        else console.log('Could not find valid crossword.');
+    } catch (e) {
+        console.error('Error');
+        console.error(e);
+    }
 }
 
 main();

@@ -1,5 +1,17 @@
 import { State, WordPlace } from './types';
 
+// TODO: Switch to correct typed import
+declare var require: any;
+const { argv } = require('node:process');
+
+export function getArgValue(arg: string): string | undefined {
+    const argList = argv as string[];
+    const argIndex = argList.indexOf(arg);
+    if (argIndex >= 0 && argIndex + 1 < argList.length) {
+        return argList[argIndex + 1];
+    }
+}
+
 //** Get clean copy of state with empty values */
 export function cleanCopyState(state: State): State {
     const field = state.field.map((line) => line.map((cell) => ({ ...cell })));

@@ -92,6 +92,6 @@ function solve(words, initialState) {
     const solveState = (0, utils_1.cleanCopyState)(initialState);
     solvePath = connectStateToSteps(solveState, solvePath);
     const solved = doSolve(words, solvePath);
-    return solveState;
+    return solved ? solveState : false;
 }
 //# sourceMappingURL=solver.js.map

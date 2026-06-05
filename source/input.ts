@@ -1,7 +1,7 @@
 import { wpToFieldXY } from './utils';
 import { Cell, Field, State, WordPlace } from './types';
 
-// TODO: Switch to correct import
+// TODO: Switch to correct typed import
 declare var require: any;
 const fs = require('fs');
 

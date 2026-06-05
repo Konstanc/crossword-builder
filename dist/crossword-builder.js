@@ -3,14 +3,23 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const input_1 = require("./input");
 const solver_1 = require("./solver");
 const output_1 = require("./output");
-// TODO: Read from params
-let dictFileName = 'words.txt';
-let fieldFileName = 'field.txt';
+const utils_1 = require("./utils");
+let dictFileName = (0, utils_1.getArgValue)('-w') || 'words.txt';
+let fieldFileName = (0, utils_1.getArgValue)('-f') || 'field.txt';
 function main() {
-    const initialState = (0, input_1.readField)(fieldFileName);
-    const words = (0, input_1.readWords)(dictFileName);
-    const solveState = (0, solver_1.solve)(words, initialState);
-    (0, output_1.printStateValues)(solveState);
+    try {
+        const initialState = (0, input_1.readField)(fieldFileName);
+        const words = (0, input_1.readWords)(dictFileName);
+        const solveState = (0, solver_1.solve)(words, initialState);
+        if (solveState)
+            (0, output_1.printStateValues)(solveState);
+        else
+            console.log('Could not find valid crossword.');
+    }
+    catch (e) {
+        console.error('Error');
+        console.error(e);
+    }
 }
 main();
 //# sourceMappingURL=crossword-builder.js.map

@@ -1,8 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.wpToFieldXY = void 0;
+exports.getArgValue = getArgValue;
 exports.cleanCopyState = cleanCopyState;
 exports.fillWordPlaceWithIntersections = fillWordPlaceWithIntersections;
+const { argv } = require('node:process');
+function getArgValue(arg) {
+    const argList = argv;
+    const argIndex = argList.indexOf(arg);
+    if (argIndex >= 0 && argIndex + 1 < argList.length) {
+        return argList[argIndex + 1];
+    }
+}
 //** Get clean copy of state with empty values */
 function cleanCopyState(state) {
     const field = state.field.map((line) => line.map((cell) => ({ ...cell })));
