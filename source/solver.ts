@@ -1,7 +1,14 @@
-import { fillFieldWordPlace, getCleanField, getWordPlaceValues } from './utils';
+import {
+    fillFieldWordPlace,
+    getCleanField,
+    getWordPlaceValues,
+    perfLogStart,
+} from './utils';
 import { Field, MatchIndex, SolveStep, Conditions, WordPlace } from './types';
+import { OPTIONS } from './crossword-builder';
 
 function buildIndices(words: string[], solveSteps: SolveStep[]) {
+    const logEnd = perfLogStart('Building indices...', true);
     const indices = new Map<string, MatchIndex>();
     solveSteps.forEach(
         (step) =>
@@ -21,9 +28,9 @@ function buildIndices(words: string[], solveSteps: SolveStep[]) {
                     matchIndex.index!.set(key, indexWords);
                 }
                 // Randomizing order to have different crosswords on each run.
-                const placeTo = Math.floor(
-                    Math.random() * (indexWords.length + 1),
-                );
+                const placeTo = OPTIONS.noRandom
+                    ? indexWords.length
+                    : Math.floor(Math.random() * (indexWords.length + 1));
                 indexWords.splice(placeTo, 0, i);
             }
         });
@@ -33,6 +40,7 @@ function buildIndices(words: string[], solveSteps: SolveStep[]) {
         if (matchIndex) step.matchIndex = matchIndex;
     });
 
+    logEnd();
     return indices;
 }
 
@@ -94,6 +102,13 @@ function solveStepsFromN(
     // TODO: can we make this true functional?
     for (let i = 0; i < candidates.length; i++) {
         const candidateWord = words[candidates[i]];
+        const logEnd =
+            stepN == 0 &&
+            perfLogStart(
+                `[${i + 1}/${candidates.length}] ${candidateWord}`,
+                true,
+            );
+
         fillFieldWordPlace(field, wp, candidateWord);
         if (
             selectedWords.indexOf(candidateWord) < 0 &&
@@ -104,8 +119,11 @@ function solveStepsFromN(
                 solveSteps,
                 stepN + 1,
             )
-        )
+        ) {
+            logEnd && logEnd();
             return true;
+        }
+        logEnd && logEnd();
     }
     return false;
 }
@@ -115,9 +133,11 @@ function doSolve(words: string[], field: Field, solveSteps: SolveStep[]) {
 }
 
 export function solve(words: string[], conditions: Conditions) {
+    const logEnd = perfLogStart('Total');
     const solvePath = buildSolvePath(conditions);
     buildIndices(words, solvePath);
     const field = getCleanField(conditions.field);
     const solved = doSolve(words, field, solvePath);
+    logEnd();
     return solved ? field : false;
 }

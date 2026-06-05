@@ -1,16 +1,20 @@
 import { readField, readWords } from './input';
 import { solve } from './solver';
 import { printFieldValues, printValues } from './output';
-import { getArgValue } from './utils';
+import { getArgValue, getBoolArgValue } from './utils';
 
-let dictFileName = getArgValue('-w') || 'words.txt';
-let fieldFileName = getArgValue('-f') || 'field.txt';
+const DICT_FILE = getArgValue('-w') || 'words.txt';
+const FIELD_FILE = getArgValue('-f') || 'field.txt';
+export const OPTIONS = {
+    verbose: getBoolArgValue('-v'),
+    noRandom: getBoolArgValue('-nr'),
+};
 
 function main() {
     try {
-        const conditions = readField(fieldFileName);
+        const conditions = readField(FIELD_FILE);
 
-        const words = readWords(dictFileName);
+        const words = readWords(DICT_FILE);
 
         const solvedField = solve(words, conditions);
         if (solvedField) printFieldValues(solvedField);

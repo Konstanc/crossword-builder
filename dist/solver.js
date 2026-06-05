@@ -2,7 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.solve = solve;
 const utils_1 = require("./utils");
+const crossword_builder_1 = require("./crossword-builder");
 function buildIndices(words, solveSteps) {
+    const logEnd = (0, utils_1.perfLogStart)('Building indices...', true);
     const indices = new Map();
     solveSteps.forEach((step) => !indices.has(step.matchIndex.name) &&
         indices.set(step.matchIndex.name, step.matchIndex));
@@ -17,7 +19,9 @@ function buildIndices(words, solveSteps) {
                     matchIndex.index.set(key, indexWords);
                 }
                 // Randomizing order to have different crosswords on each run.
-                const placeTo = Math.floor(Math.random() * (indexWords.length + 1));
+                const placeTo = crossword_builder_1.OPTIONS.noRandom
+                    ? indexWords.length
+                    : Math.floor(Math.random() * (indexWords.length + 1));
                 indexWords.splice(placeTo, 0, i);
             }
         });
@@ -27,6 +31,7 @@ function buildIndices(words, solveSteps) {
         if (matchIndex)
             step.matchIndex = matchIndex;
     });
+    logEnd();
     return indices;
 }
 function wordPlaceToStep(field, stepWordPlace) {
@@ -71,10 +76,15 @@ function solveStepsFromN(words, selectedWords, field, solveSteps, stepN) {
     // TODO: can we make this true functional?
     for (let i = 0; i < candidates.length; i++) {
         const candidateWord = words[candidates[i]];
+        const logEnd = stepN == 0 &&
+            (0, utils_1.perfLogStart)(`[${i + 1}/${candidates.length}] ${candidateWord}`, true);
         (0, utils_1.fillFieldWordPlace)(field, wp, candidateWord);
         if (selectedWords.indexOf(candidateWord) < 0 &&
-            solveStepsFromN(words, [...selectedWords, candidateWord], field, solveSteps, stepN + 1))
+            solveStepsFromN(words, [...selectedWords, candidateWord], field, solveSteps, stepN + 1)) {
+            logEnd && logEnd();
             return true;
+        }
+        logEnd && logEnd();
     }
     return false;
 }
@@ -82,10 +92,12 @@ function doSolve(words, field, solveSteps) {
     return solveStepsFromN(words, [], field, solveSteps, 0);
 }
 function solve(words, conditions) {
+    const logEnd = (0, utils_1.perfLogStart)('Total');
     const solvePath = buildSolvePath(conditions);
     buildIndices(words, solvePath);
     const field = (0, utils_1.getCleanField)(conditions.field);
     const solved = doSolve(words, field, solvePath);
+    logEnd();
     return solved ? field : false;
 }
 //# sourceMappingURL=solver.js.map
