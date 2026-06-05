@@ -1,17 +1,10 @@
-import { State, WordPlace } from './types';
-import { wpToFieldXY } from './utils';
+import { Field } from './types';
 
-function wordPlaceValuesToArray(state: State) {
-    const { field, wordPlaces } = state;
-    const res: string[][] = Array.from({ length: field.length }, () =>
-        Array.from({ length: field[0].length }, () => '*'),
-    );
-    wordPlaces.forEach((wp) => {
-        for (let i = 0; i < wp.length; i++) {
-            const { x, y } = wpToFieldXY(wp, i);
-            res[y][x] = wp.values[i] || '*';
-        }
-    });
+function fieldTo2D(field: Field): string[][] {
+    const res: string[][] = [];
+    for (let i = 0; i < field.length; i += field.width) {
+        res.push(field.values.slice(i, i + field.width).map((v) => v || '*'));
+    }
     return res;
 }
 
@@ -21,18 +14,6 @@ export function printValues(values: string[][]) {
     });
 }
 
-export function printStateValues(state: State) {
-    printValues(wordPlaceValuesToArray(state));
-}
-
-//** Print wordPlaces list for debug purpose */
-export function printWordPlaces(wordPlaces: WordPlace[]) {
-    wordPlaces.forEach((wp) => {
-        console.log(
-            wp.id,
-            wp.horizontal ? 'h' : 'v',
-            [wp.x, wp.y].join(', '),
-            wp.values.map((v) => v || '*').join(''),
-        );
-    });
+export function printFieldValues(field: Field) {
+    printValues(fieldTo2D(field));
 }

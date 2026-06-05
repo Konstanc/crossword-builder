@@ -4,21 +4,18 @@ exports.readField = readField;
 exports.readWords = readWords;
 const utils_1 = require("./utils");
 const fs = require('fs');
-// TODO: Looks like it's time to use classes and move this to a method. :\
-// TODO: make this links in WordPlace instead?
-function getWPCells({ field }, wp) {
+function getWPCells(field, wp) {
     const res = [];
     for (let i = 0; i < wp.length; i++) {
-        const { x, y } = (0, utils_1.wpToFieldXY)(wp, i);
+        const { x, y } = (0, utils_1.wpToField2dXY)(wp, i);
         res.push(field[y][x]);
     }
     return res;
 }
-// Putting links everywhere for ease of processing
-function connectWordPlaces(state) {
-    const { field, wordPlaces } = state;
-    wordPlaces.forEach((wp) => getWPCells(state, wp).forEach((cell) => cell.wordPlaces.push(wp)));
-    wordPlaces.forEach((wp) => getWPCells(state, wp).forEach((cell) => cell.wordPlaces
+//** Calculate intersections */
+function connectWordPlaces(field, wordPlaces) {
+    wordPlaces.forEach((wp) => getWPCells(field, wp).forEach((cell) => cell.wordPlaces.push(wp)));
+    wordPlaces.forEach((wp) => getWPCells(field, wp).forEach((cell) => cell.wordPlaces
         .filter((w) => w.id !== wp.id)
         .forEach((w) => {
         if (!wp.intersections.includes(w)) {
@@ -49,42 +46,49 @@ function lineToWordPlaces(line) {
     } while (pos < line.length);
     return res;
 }
-function detectWordPlaces(field) {
+function detectWordPlaces(field2d) {
+    const fieldWidth = field2d[0].length;
     const wordPlaces = [];
     let id = 0;
-    for (let row = 0; row < field.length; row++) {
-        wordPlaces.push(...lineToWordPlaces(field[row]).map(({ start, end }) => ({
+    for (let row = 0; row < field2d.length; row++) {
+        wordPlaces.push(...lineToWordPlaces(field2d[row]).map(({ start, end }) => ({
             id: id++,
             horizontal: true,
             x: start,
             y: row,
+            start: start + row * fieldWidth,
             length: end - start,
             intersections: [],
-            values: [],
         })));
     }
-    const columns = field[0].map((_, i) => field.map((row) => row[i]));
-    for (let col = 0; col < field[0].length; col++) {
+    const columns = field2d[0].map((_, i) => field2d.map((row) => row[i]));
+    for (let col = 0; col < field2d[0].length; col++) {
         wordPlaces.push(...lineToWordPlaces(columns[col]).map(({ start, end }) => ({
             id: id++,
             horizontal: false,
             x: col,
             y: start,
+            start: col + start * fieldWidth,
             length: end - start,
             intersections: [],
-            values: Array.from({ length: end - start }, () => ''),
         })));
     }
     return wordPlaces;
 }
 function readField(fileName) {
-    const field = fs.readFileSync(fileName, { encoding: 'utf8' })
+    const field2d = fs.readFileSync(fileName, { encoding: 'utf8' })
         .split('\n')
         .map((line) => line.trim())
         .map((line) => line.split('').map((c) => ({ used: c !== '*', wordPlaces: [] })));
-    const state = { field, wordPlaces: detectWordPlaces(field) };
-    connectWordPlaces(state);
-    return state;
+    const wordPlaces = detectWordPlaces(field2d);
+    connectWordPlaces(field2d, wordPlaces);
+    const fieldLength = field2d[0].length * field2d.length;
+    const field = {
+        width: field2d[0].length,
+        length: fieldLength,
+        values: Array.from({ length: fieldLength }, () => '')
+    };
+    return { field, wordPlaces };
 }
 function readWords(fileName) {
     const words = fs.readFileSync(fileName, { encoding: 'utf8' })

@@ -1,18 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.printValues = printValues;
-exports.printStateValues = printStateValues;
-exports.printWordPlaces = printWordPlaces;
-const utils_1 = require("./utils");
-function wordPlaceValuesToArray(state) {
-    const { field, wordPlaces } = state;
-    const res = Array.from({ length: field.length }, () => Array.from({ length: field[0].length }, () => '*'));
-    wordPlaces.forEach((wp) => {
-        for (let i = 0; i < wp.length; i++) {
-            const { x, y } = (0, utils_1.wpToFieldXY)(wp, i);
-            res[y][x] = wp.values[i] || '*';
-        }
-    });
+exports.printFieldValues = printFieldValues;
+function fieldTo2D(field) {
+    const res = [];
+    for (let i = 0; i < field.length; i += field.width) {
+        res.push(field.values.slice(i, i + field.width).map((v) => v || '*'));
+    }
     return res;
 }
 function printValues(values) {
@@ -20,13 +14,7 @@ function printValues(values) {
         console.log(line.join(''));
     });
 }
-function printStateValues(state) {
-    printValues(wordPlaceValuesToArray(state));
-}
-//** Print wordPlaces list for debug purpose */
-function printWordPlaces(wordPlaces) {
-    wordPlaces.forEach((wp) => {
-        console.log(wp.id, wp.horizontal ? 'h' : 'v', [wp.x, wp.y].join(', '), wp.values.map((v) => v || '*').join(''));
-    });
+function printFieldValues(field) {
+    printValues(fieldTo2D(field));
 }
 //# sourceMappingURL=output.js.map

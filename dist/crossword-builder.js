@@ -12,7 +12,7 @@ function main() {
         const words = (0, input_1.readWords)(dictFileName);
         const solveState = (0, solver_1.solve)(words, initialState);
         if (solveState)
-            (0, output_1.printStateValues)(solveState);
+            (0, output_1.printFieldValues)(solveState);
         else
             console.log('Could not find valid crossword.');
     }

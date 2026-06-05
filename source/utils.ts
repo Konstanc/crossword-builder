@@ -1,4 +1,4 @@
-import { State, WordPlace } from './types';
+import { Field, WordPlace } from './types';
 
 // TODO: Switch to correct typed import
 declare var require: any;
@@ -12,55 +12,32 @@ export function getArgValue(arg: string): string | undefined {
     }
 }
 
-//** Get clean copy of state with empty values */
-export function cleanCopyState(state: State): State {
-    const field = state.field.map((line) => line.map((cell) => ({ ...cell })));
-    const wordPlaces = state.wordPlaces.map((wp) => ({
-        ...wp,
-        values: Array.from({ length: wp.length }, () => ''),
-    }));
-    wordPlaces.forEach((wp) => {
-        wp.intersections = wp.intersections.map(
-            (intersection) => wordPlaces.find((w) => w.id === intersection.id)!,
-        );
-    });
-    field.forEach((line) =>
-        line.forEach((cell) => {
-            cell.wordPlaces = cell.wordPlaces.map(
-                (wp) => wordPlaces.find((w) => w.id === wp.id)!,
-            );
-        }),
-    );
-
-    return { field, wordPlaces };
+export function getCleanField(field: Field): Field {
+    return { ...field, values: Array.from({ length: field.length }, () => '') };
 }
 
-export const wpToFieldXY = (wp: WordPlace, i: number) =>
+//** Get wordPlaceValues from the field */
+export function getWordPlaceValues(field: Field, wp: WordPlace): string[] {
+    const res: string[] = [];
+    for (let i = 0; i < wp.length; i++) {
+        res.push(field.values[wpToFieldIndex(field, wp, i)]);
+    }
+    return res;
+}
+
+export const wpToField2dXY = (wp: WordPlace, i: number) =>
     wp.horizontal ? { x: wp.x + i, y: wp.y } : { x: wp.x, y: wp.y + i };
 
-export function fillWordPlaceWithIntersections(
+export const wpToFieldIndex = (field: Field, wp: WordPlace, i: number) =>
+    wp.start + i * (wp.horizontal ? 1 : field.width);
+
+export function fillFieldWordPlace(
+    field: Field,
     wp: WordPlace,
     word = 'XXXXXXXXXX',
 ) {
     for (let i = 0; i < wp.length; i++) {
         const letter = word[i];
-        const { x, y } = wpToFieldXY(wp, i);
-        wp.values[i] = letter;
-        // TODO: Optimize this
-        wp.intersections.forEach((intersectingWP) => {
-            if (
-                wp.horizontal &&
-                !intersectingWP.horizontal &&
-                intersectingWP.x === x
-            ) {
-                intersectingWP.values[y - intersectingWP.y] = letter;
-            } else if (
-                !wp.horizontal &&
-                intersectingWP.horizontal &&
-                intersectingWP.y === y
-            ) {
-                intersectingWP.values[x - intersectingWP.x] = letter;
-            }
-        });
+        field.values[wpToFieldIndex(field, wp, i)] = letter;
     }
 }

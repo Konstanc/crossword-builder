@@ -1,30 +1,27 @@
-import { wpToFieldXY } from './utils';
-import { Cell, Field, State, WordPlace } from './types';
+import { wpToField2dXY } from './utils';
+import { Cell, Field, Field2D, WordPlace } from './types';
 
 // TODO: Switch to correct typed import
 declare var require: any;
 const fs = require('fs');
 
-// TODO: Looks like it's time to use classes and move this to a method. :\
-// TODO: make this links in WordPlace instead?
-function getWPCells({ field }: State, wp: WordPlace): Cell[] {
+function getWPCells(field: Field2D, wp: WordPlace): Cell[] {
     const res: Cell[] = [];
     for (let i = 0; i < wp.length; i++) {
-        const { x, y } = wpToFieldXY(wp, i);
+        const { x, y } = wpToField2dXY(wp, i);
         res.push(field[y][x]);
     }
     return res;
 }
 
-// Putting links everywhere for ease of processing
-function connectWordPlaces(state: State) {
-    const { field, wordPlaces } = state;
+//** Calculate intersections */
+function connectWordPlaces(field: Field2D, wordPlaces: WordPlace[]) {
     wordPlaces.forEach((wp) =>
-        getWPCells(state, wp).forEach((cell) => cell.wordPlaces.push(wp)),
+        getWPCells(field, wp).forEach((cell) => cell.wordPlaces.push(wp)),
     );
 
     wordPlaces.forEach((wp) =>
-        getWPCells(state, wp).forEach((cell) =>
+        getWPCells(field, wp).forEach((cell) =>
             cell.wordPlaces
                 .filter((w) => w.id !== wp.id)
                 .forEach((w) => {
@@ -61,33 +58,34 @@ function lineToWordPlaces(line: Cell[]): { start: number; end: number }[] {
     return res;
 }
 
-function detectWordPlaces(field: Field): WordPlace[] {
+function detectWordPlaces(field2d: Field2D): WordPlace[] {
+    const fieldWidth = field2d[0].length;
     const wordPlaces: WordPlace[] = [];
     let id = 0;
-    for (let row = 0; row < field.length; row++) {
+    for (let row = 0; row < field2d.length; row++) {
         wordPlaces.push(
-            ...lineToWordPlaces(field[row]).map(({ start, end }) => ({
+            ...lineToWordPlaces(field2d[row]).map(({ start, end }) => ({
                 id: id++,
                 horizontal: true,
                 x: start,
                 y: row,
+                start: start + row * fieldWidth,
                 length: end - start,
                 intersections: [],
-                values: [],
             })),
         );
     }
-    const columns = field[0].map((_, i) => field.map((row) => row[i]));
-    for (let col = 0; col < field[0].length; col++) {
+    const columns = field2d[0].map((_, i) => field2d.map((row) => row[i]));
+    for (let col = 0; col < field2d[0].length; col++) {
         wordPlaces.push(
             ...lineToWordPlaces(columns[col]).map(({ start, end }) => ({
                 id: id++,
                 horizontal: false,
                 x: col,
                 y: start,
+                start: col + start * fieldWidth,
                 length: end - start,
                 intersections: [],
-                values: Array.from({ length: end - start }, () => ''),
             })),
         );
     }
@@ -98,18 +96,24 @@ export function readField(fileName: string): {
     field: Field;
     wordPlaces: WordPlace[];
 } {
-    const field = (fs.readFileSync(fileName, { encoding: 'utf8' }) as string)
+    const field2d = (fs.readFileSync(fileName, { encoding: 'utf8' }) as string)
         .split('\n')
         .map((line) => line.trim())
         .map((line) =>
             line.split('').map((c) => ({ used: c !== '*', wordPlaces: [] })),
         );
-    const state: State = { field, wordPlaces: detectWordPlaces(field) };
-    connectWordPlaces(state);
+    const wordPlaces = detectWordPlaces(field2d);
+    connectWordPlaces(field2d, wordPlaces);
 
-    return state;
+    const fieldLength = field2d[0].length * field2d.length;
+    const field: Field = {
+        width: field2d[0].length,
+        length: fieldLength,
+        values: Array.from({length: fieldLength}, () => '')
+    }
+
+    return {field, wordPlaces};
 }
-
 
 export function readWords(fileName: string) {
     const words = (fs.readFileSync(fileName, { encoding: 'utf8' }) as string)
