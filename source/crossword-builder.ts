@@ -8,12 +8,12 @@ let fieldFileName = getArgValue('-f') || 'field.txt';
 
 function main() {
     try {
-        const initialState = readField(fieldFileName);
+        const conditions = readField(fieldFileName);
 
         const words = readWords(dictFileName);
 
-        const solveState = solve(words, initialState);
-        if (solveState) printFieldValues(solveState);
+        const solvedField = solve(words, conditions);
+        if (solvedField) printFieldValues(solvedField);
         else console.log('Could not find valid crossword.');
     } catch (e) {
         console.error('Error');

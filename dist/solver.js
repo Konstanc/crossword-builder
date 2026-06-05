@@ -59,8 +59,7 @@ function buildSolvePath(state) {
     }
     return solvePath;
 }
-// Mutating the state is not ideal but fast and good enough for the first version
-function solveStepsFrom(words, selectedWords, field, solveSteps, stepN) {
+function solveStepsFromN(words, selectedWords, field, solveSteps, stepN) {
     var _a;
     if (stepN >= solveSteps.length)
         return true;
@@ -74,18 +73,18 @@ function solveStepsFrom(words, selectedWords, field, solveSteps, stepN) {
         const candidateWord = words[candidates[i]];
         (0, utils_1.fillFieldWordPlace)(field, wp, candidateWord);
         if (selectedWords.indexOf(candidateWord) < 0 &&
-            solveStepsFrom(words, [...selectedWords, candidateWord], field, solveSteps, stepN + 1))
+            solveStepsFromN(words, [...selectedWords, candidateWord], field, solveSteps, stepN + 1))
             return true;
     }
     return false;
 }
 function doSolve(words, field, solveSteps) {
-    return solveStepsFrom(words, [], field, solveSteps, 0);
+    return solveStepsFromN(words, [], field, solveSteps, 0);
 }
-function solve(words, state) {
-    const solvePath = buildSolvePath(state);
+function solve(words, conditions) {
+    const solvePath = buildSolvePath(conditions);
     buildIndices(words, solvePath);
-    const field = (0, utils_1.getCleanField)(state.field);
+    const field = (0, utils_1.getCleanField)(conditions.field);
     const solved = doSolve(words, field, solvePath);
     return solved ? field : false;
 }

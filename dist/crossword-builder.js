@@ -8,11 +8,11 @@ let dictFileName = (0, utils_1.getArgValue)('-w') || 'words.txt';
 let fieldFileName = (0, utils_1.getArgValue)('-f') || 'field.txt';
 function main() {
     try {
-        const initialState = (0, input_1.readField)(fieldFileName);
+        const conditions = (0, input_1.readField)(fieldFileName);
         const words = (0, input_1.readWords)(dictFileName);
-        const solveState = (0, solver_1.solve)(words, initialState);
-        if (solveState)
-            (0, output_1.printFieldValues)(solveState);
+        const solvedField = (0, solver_1.solve)(words, conditions);
+        if (solvedField)
+            (0, output_1.printFieldValues)(solvedField);
         else
             console.log('Could not find valid crossword.');
     }

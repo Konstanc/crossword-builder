@@ -25,7 +25,7 @@ export type Cell = {
 //** 2d Field model. Used only on the parsing stage */
 export type Field2D = Cell[][];
 
-export type State = {
+export type Conditions = {
     field: Field;
     wordPlaces: WordPlace[];
 };

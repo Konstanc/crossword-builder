@@ -31,6 +31,7 @@ export const wpToField2dXY = (wp: WordPlace, i: number) =>
 export const wpToFieldIndex = (field: Field, wp: WordPlace, i: number) =>
     wp.start + i * (wp.horizontal ? 1 : field.width);
 
+//** Put the word to the field values in wordplace */
 export function fillFieldWordPlace(
     field: Field,
     wp: WordPlace,

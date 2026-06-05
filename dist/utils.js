@@ -28,6 +28,7 @@ const wpToField2dXY = (wp, i) => wp.horizontal ? { x: wp.x + i, y: wp.y } : { x:
 exports.wpToField2dXY = wpToField2dXY;
 const wpToFieldIndex = (field, wp, i) => wp.start + i * (wp.horizontal ? 1 : field.width);
 exports.wpToFieldIndex = wpToFieldIndex;
+//** Put the word to the field values in wordplace */
 function fillFieldWordPlace(field, wp, word = 'XXXXXXXXXX') {
     for (let i = 0; i < wp.length; i++) {
         const letter = word[i];

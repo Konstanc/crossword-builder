@@ -1,5 +1,5 @@
 import { fillFieldWordPlace, getCleanField, getWordPlaceValues } from './utils';
-import { Field, MatchIndex, SolveStep, State, WordPlace } from './types';
+import { Field, MatchIndex, SolveStep, Conditions, WordPlace } from './types';
 
 function buildIndices(words: string[], solveSteps: SolveStep[]) {
     const indices = new Map<string, MatchIndex>();
@@ -59,7 +59,7 @@ function wordPlaceToStep(field: Field, stepWordPlace: WordPlace): SolveStep {
     };
 }
 
-function buildSolvePath(state: State): SolveStep[] {
+function buildSolvePath(state: Conditions): SolveStep[] {
     const { wordPlaces } = state;
     const field = getCleanField(state.field);
     // Starting with the most connected word place as a basic optimization.
@@ -78,8 +78,7 @@ function buildSolvePath(state: State): SolveStep[] {
     return solvePath;
 }
 
-// Mutating the state is not ideal but fast and good enough for the first version
-function solveStepsFrom(
+function solveStepsFromN(
     words: string[],
     selectedWords: string[],
     field: Field,
@@ -98,7 +97,7 @@ function solveStepsFrom(
         fillFieldWordPlace(field, wp, candidateWord);
         if (
             selectedWords.indexOf(candidateWord) < 0 &&
-            solveStepsFrom(
+            solveStepsFromN(
                 words,
                 [...selectedWords, candidateWord],
                 field,
@@ -112,13 +111,13 @@ function solveStepsFrom(
 }
 
 function doSolve(words: string[], field: Field, solveSteps: SolveStep[]) {
-    return solveStepsFrom(words, [], field, solveSteps, 0);
+    return solveStepsFromN(words, [], field, solveSteps, 0);
 }
 
-export function solve(words: string[], state: State) {
-    const solvePath = buildSolvePath(state);
+export function solve(words: string[], conditions: Conditions) {
+    const solvePath = buildSolvePath(conditions);
     buildIndices(words, solvePath);
-    const field = getCleanField(state.field);
+    const field = getCleanField(conditions.field);
     const solved = doSolve(words, field, solvePath);
     return solved ? field : false;
 }
