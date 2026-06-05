@@ -30,7 +30,9 @@ ______
 More examples can be found in `./fields`.
 
 `-w <words_list_file>` default 'words.txt', a file containing the dictionary.
+
 `-v` verbose output with performance data.
+
 `-nr` do not randomize words (gives stable results).
 
 ## Build

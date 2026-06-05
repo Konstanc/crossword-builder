@@ -55,11 +55,10 @@ function wordPlaceToStep(field: Field, stepWordPlace: WordPlace): SolveStep {
         word.length + filledCharIndexes.map((i) => word[i]).join('');
     const wordShouldBeIndexed = (word: string) =>
         word.length === stepWordPlace.length;
-    const wordPlaceToKey = (inField: Field, wp: WordPlace) =>
-        wp.length +
-        filledCharIndexes
-            .map((i) => getWordPlaceValues(inField, wp)[i])
-            .join('');
+    const wordPlaceToKey = (inField: Field, wp: WordPlace) => {
+        const wpValues = getWordPlaceValues(inField, wp);
+        return wp.length + filledCharIndexes.map((i) => wpValues[i]).join('');
+    };
 
     return {
         wordPlace: stepWordPlace,

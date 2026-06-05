@@ -40,10 +40,10 @@ function wordPlaceToStep(field, stepWordPlace) {
     const name = stepWordPlace.length + filledCharIndexes.join('');
     const wordToKey = (word) => word.length + filledCharIndexes.map((i) => word[i]).join('');
     const wordShouldBeIndexed = (word) => word.length === stepWordPlace.length;
-    const wordPlaceToKey = (inField, wp) => wp.length +
-        filledCharIndexes
-            .map((i) => (0, utils_1.getWordPlaceValues)(inField, wp)[i])
-            .join('');
+    const wordPlaceToKey = (inField, wp) => {
+        const wpValues = (0, utils_1.getWordPlaceValues)(inField, wp);
+        return wp.length + filledCharIndexes.map((i) => wpValues[i]).join('');
+    };
     return {
         wordPlace: stepWordPlace,
         matchIndex: { name, wordToKey, wordPlaceToKey, wordShouldBeIndexed },
